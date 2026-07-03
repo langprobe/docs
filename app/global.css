@@ -2,6 +2,69 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
+/* Wire next/font/google variables (set on <html> in app/layout.tsx) into
+   Tailwind's theme so font-sans / font-mono utilities and `var(--font-*)`
+   resolve to Plus Jakarta Sans / Geist Mono instead of the Tailwind
+   defaults. */
+@theme {
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
+}
+
+/* langprobe DESIGN.md tokens (philadelphia theme) — canonical source is
+   DESIGN.md. Light-mode only; do not add a dark override here. */
+:root {
+  --bg: #fcfcfc;
+  --surface: #ffffff;
+  --surface-2: #f7f7f5;
+  --surface-3: #f0f0ee;
+
+  --border: #ececea;
+  --border-strong: #dddddb;
+
+  --text: #0a0a0a;
+  --text-2: #4b4b49;
+  --text-3: #6c6c69;
+  --text-4: #b4b4ae; /* disabled only */
+
+  --accent: #0485f7;
+  --accent-hover: #3592f9;
+  --accent-soft: #e0f0fe;
+  --link: #0a66c2;
+
+  /* Radius scale stops at --r-4 (12px). Never exceed 12px outside round
+     status dots / avatars. */
+  --r-1: 4px;
+  --r-2: 6px;
+  --r-3: 8px;
+  --r-4: 12px;
+  --radius: var(--r-3);
+}
+
+/* Fumadocs UI variable bridge — override the theme's own custom properties
+   (see node_modules/fumadocs-ui/css/lib/default-colors.css for the full,
+   authoritative list of --color-fd-* names shipped in fumadocs-ui 16.10.7)
+   so the whole docs chrome adopts our palette instead of its neutral/HSL
+   defaults. Declared after the fumadocs-ui imports so ours win. */
+:root {
+  --color-fd-background: var(--bg);
+  --color-fd-foreground: var(--text);
+  --color-fd-muted: var(--surface-2);
+  --color-fd-muted-foreground: var(--text-3);
+  --color-fd-popover: var(--surface);
+  --color-fd-popover-foreground: var(--text);
+  --color-fd-card: var(--surface);
+  --color-fd-card-foreground: var(--text);
+  --color-fd-border: var(--border);
+  --color-fd-primary: var(--accent);
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-secondary: var(--surface-3);
+  --color-fd-secondary-foreground: var(--text);
+  --color-fd-accent: var(--accent-soft);
+  --color-fd-accent-foreground: var(--text);
+  --color-fd-ring: var(--accent);
+}
+
 html {
   scrollbar-gutter: stable;
 }
@@ -9,4 +72,26 @@ html {
 html > body[data-scroll-locked] {
   margin-right: 0px !important;
   --removed-body-scroll-bar-size: 0px !important;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  letter-spacing: -0.005em;
+}
+
+code,
+kbd,
+pre,
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+a {
+  color: var(--link);
+}
+
+::selection {
+  background: #d5eafd;
 }

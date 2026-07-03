@@ -1,14 +1,26 @@
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import './global.css';
-import { Inter } from 'next/font/google';
+import { Plus_Jakarta_Sans, Geist_Mono } from 'next/font/google';
 
-const inter = Inter({
+const sans = Plus_Jakarta_Sans({
   subsets: ['latin'],
+  variable: '--font-sans',
+  weight: ['400', '500', '600', '700', '800'],
+});
+
+const mono = Geist_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  weight: ['400', '500', '600'],
 });
 
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="en" className={inter.className} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${sans.variable} ${mono.variable}`}
+      suppressHydrationWarning
+    >
       <body className="flex flex-col min-h-screen">
         {/*
           Static export (`output: 'export'`) has no server to answer
@@ -17,8 +29,17 @@ export default function Layout({ children }: LayoutProps<'/'>) {
           fetches the pre-built index from /api/search (exported as a static
           JSON file at build time, see app/api/search/route.ts) and searches
           in-browser instead of hitting a dynamic API route.
+
+          `theme` forces light mode only (per DESIGN.md): the app has no
+          dark theme authored yet, so we must not let next-themes flip to
+          the OS preference.
         */}
-        <RootProvider search={{ options: { type: 'static' } }}>{children}</RootProvider>
+        <RootProvider
+          search={{ options: { type: 'static' } }}
+          theme={{ forcedTheme: 'light', enableSystem: false }}
+        >
+          {children}
+        </RootProvider>
       </body>
     </html>
   );
