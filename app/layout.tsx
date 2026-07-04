@@ -1,6 +1,7 @@
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import './global.css';
 import { Plus_Jakarta_Sans, Geist_Mono } from 'next/font/google';
+import { PlaygroundVarsProvider } from '@/lib/playground-context';
 
 const sans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -38,7 +39,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
           search={{ options: { type: 'static' } }}
           theme={{ forcedTheme: 'light', enableSystem: false }}
         >
-          {children}
+          <PlaygroundVarsProvider>{children}</PlaygroundVarsProvider>
         </RootProvider>
       </body>
     </html>
