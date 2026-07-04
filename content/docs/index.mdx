@@ -1,13 +1,59 @@
 ---
-title: Hello World
-description: Your first document
+title: Introduction
+description: What langprobe is, the replay + agent-first wedge, and where to go next.
 ---
 
-Welcome to the docs! You can start writing documents in `/content/docs`.
+**langprobe is the real debugger for agents.** It's a self-hosted LLM
+observability, eval-rigor, and agent-replay platform that traces every run,
+lets you replay a captured run with edits applied, and scores outputs with a
+panel of LLM judges — all in one place, in your VPC.
 
-## What is Next?
+Most tools in this space are dashboards for humans. langprobe's wedge is two
+things they don't do:
+
+## Replay
+
+Open a broken run, edit a prompt, model, or tool config, re-run it, and diff
+what changed — span by span, with a **determinism verdict** so you know
+whether the fix is real or a lucky sample. This is the debugger you reach for
+at 2am.
+
+## Agent-first
+
+The same surface is built for agents, not just people. Every read is
+available as a **token-budgeted, LLM-legible projection over REST and MCP**,
+so an agent can debug an agent: find the failed run, read its salient slice,
+replay an edit, read the diff. A 48k-token trace becomes a 2k-token salient
+slice.
+
+## No proprietary SDK
+
+langprobe ingests plain **OTLP/HTTP** at `POST /v1/traces` — no proprietary
+SDK required. Stock OpenInference instrumentors for CrewAI, DSPy, Pydantic
+AI, OpenAI Agents, LlamaIndex, and bare providers work out of the box, or use
+the [Python SDK](/docs/sdk-python) directly.
+
+## Next steps
 
 <Cards>
-  <Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
-  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />
+  <Card
+    title="Getting Started"
+    href="/docs/getting-started/quickstart"
+    description="Self-host the stack and send your first trace"
+  />
+  <Card
+    title="Guides"
+    href="/docs/guides"
+    description="Framework integrations, replay, and eval-rigor walkthroughs"
+  />
+  <Card
+    title="API Reference"
+    href="/docs/api"
+    description="Every REST operation, generated from the OpenAPI schema"
+  />
+  <Card
+    title="Python SDK"
+    href="/docs/sdk-python"
+    description="Instrument your agent directly with the langprobe Python SDK"
+  />
 </Cards>
