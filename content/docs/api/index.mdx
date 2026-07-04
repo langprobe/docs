@@ -1,0 +1,26 @@
+---
+title: API Reference
+description: Auto-generated from the langprobe OpenAPI schema.
+---
+
+The langprobe API reference below is generated directly from the committed
+OpenAPI schema at `openapi/openapi.json` (101 operations across 30 resource
+tags). Every operation page includes the request/response shape and an
+interactive request panel.
+
+Requests from the panel are made directly from your browser to
+`https://app.langprobe.com` (or whichever host you set in the
+[playground settings](/docs)) — there is no server-side proxy, so this site
+can be fully static. If your host doesn't allow cross-origin requests from
+this docs site, use the equivalent `curl` command shown on each page instead.
+
+Set your API key once via the playground settings bar and it will be reused
+for every request on this site, either as a `Authorization: Bearer` header or
+an `X-Api-Key` header, matching the schema's two security schemes.
+
+<Cards>
+  <Card title="Runs" href="/docs/api/runs" description="Query and manage agent/LLM runs" />
+  <Card title="Traces" href="/docs/api/traces" description="Send and inspect OpenTelemetry traces" />
+  <Card title="Replays" href="/docs/api/replays" description="Replay recorded agent runs" />
+  <Card title="Eval Runs" href="/docs/api/eval-runs" description="Trigger and inspect eval runs" />
+</Cards>

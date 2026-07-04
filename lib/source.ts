@@ -2,12 +2,17 @@ import { docs } from 'collections/server';
 import { loader } from 'fumadocs-core/source';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { docsContentRoute, docsImageRoute, docsRoute } from './shared';
+import { openapi } from './openapi';
 
 // See https://fumadocs.dev/docs/headless/source-api for more info
 export const source = loader({
   baseUrl: docsRoute,
   source: docs.toFumadocsSource(),
-  plugins: [lucideIconsPlugin()],
+  // `openapi.loaderPlugin()` decorates sidebar entries for any page whose
+  // frontmatter carries `_openapi` metadata (method badge, deprecated
+  // strikethrough, webhook badge) -- it works on the physically generated
+  // MDX under content/docs/api/** just as well as on virtual pages.
+  plugins: [lucideIconsPlugin(), openapi.loaderPlugin()],
 });
 
 export function getPageImage(page: (typeof source)['$inferPage']) {

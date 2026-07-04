@@ -36,12 +36,23 @@ export function mergeOpenAPI(base, add, { title } = {}) {
 
 export function tagByResource(doc) {
   const out = structuredClone(doc);
+  const resources = new Set();
   for (const [path, item] of Object.entries(out.paths || {})) {
     const m = path.match(/^\/v1\/([^/{]+)/);
     const resource = m ? m[1] : 'other';
     for (const method of METHODS) {
-      if (item[method]) item[method].tags = [resource];
+      if (item[method]) {
+        item[method].tags = [resource];
+        resources.add(resource);
+      }
     }
   }
+  // Re-tagging operations above only rewrites `operation.tags`; without a
+  // matching document-level `tags[]` entry per resource, tools that group
+  // by tag (e.g. fumadocs-openapi's `groupBy: 'tag'`) can't resolve the
+  // tag name and silently drop every operation. Keep any pre-existing tag
+  // metadata (e.g. descriptions) and add entries for new resources.
+  const existing = new Map((out.tags || []).map((t) => [t.name, t]));
+  out.tags = [...resources].sort().map((name) => existing.get(name) || { name });
   return out;
 }

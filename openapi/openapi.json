@@ -15596,7 +15596,98 @@
       }
     }
   },
-  "tags": [],
+  "tags": [
+    {
+      "name": "admin"
+    },
+    {
+      "name": "agent"
+    },
+    {
+      "name": "alerts"
+    },
+    {
+      "name": "annotations"
+    },
+    {
+      "name": "api_keys"
+    },
+    {
+      "name": "auth"
+    },
+    {
+      "name": "comparisons"
+    },
+    {
+      "name": "datasets"
+    },
+    {
+      "name": "eval-reliability"
+    },
+    {
+      "name": "eval-runs"
+    },
+    {
+      "name": "feedback"
+    },
+    {
+      "name": "feedback-keys"
+    },
+    {
+      "name": "invitations"
+    },
+    {
+      "name": "llm-credentials"
+    },
+    {
+      "name": "luna-judges"
+    },
+    {
+      "name": "me"
+    },
+    {
+      "name": "metrics"
+    },
+    {
+      "name": "other"
+    },
+    {
+      "name": "playground"
+    },
+    {
+      "name": "poll-runs"
+    },
+    {
+      "name": "projects"
+    },
+    {
+      "name": "prompts"
+    },
+    {
+      "name": "replays"
+    },
+    {
+      "name": "runs"
+    },
+    {
+      "name": "saved-views"
+    },
+    {
+      "name": "setup"
+    },
+    {
+      "name": "studio"
+    },
+    {
+      "name": "threads"
+    },
+    {
+      "name": "traces"
+    },
+    {
+      "name": "workspaces"
+    }
+  ],
   "security": [
     {
       "bearerAuth": []

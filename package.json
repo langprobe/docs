@@ -10,13 +10,18 @@
     "postinstall": "fumadocs-mdx",
     "lint": "eslint",
     "test": "vitest run",
-    "gen:openapi": "node scripts/gen-openapi.mjs"
+    "gen:openapi": "node scripts/gen-openapi.mjs",
+    "gen:api": "node scripts/generate-api-docs.mjs",
+    "prebuild": "pnpm gen:api"
   },
   "dependencies": {
+    "@scalar/api-client-react": "^2.0.31",
     "cnfast": "^0.0.8",
     "fumadocs-core": "16.10.7",
     "fumadocs-mdx": "15.0.13",
+    "fumadocs-openapi": "11.0.6",
     "fumadocs-ui": "16.10.7",
+    "json-schema-typed": "^8.0.2",
     "lucide-react": "^1.21.0",
     "next": "16.2.9",
     "react": "^19.2.7",

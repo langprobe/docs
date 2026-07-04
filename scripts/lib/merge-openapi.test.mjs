@@ -28,3 +28,18 @@ test('tagByResource tags operations by the segment after /v1/', () => {
   assert.deepEqual(out.paths['/v1/runs/{id}/spans'].get.tags, ['runs']);
   assert.deepEqual(out.paths['/v1/traces'].post.tags, ['traces']);
 });
+
+test('tagByResource populates document-level tags[] so tag-grouping tools can resolve them', () => {
+  const doc = { paths:{ '/v1/runs/{id}/spans':{ get:{} }, '/v1/traces':{ post:{} }, '/healthz':{ get:{} } } };
+  const out = tagByResource(doc);
+  assert.deepEqual(out.tags.map((t) => t.name), ['other', 'runs', 'traces']);
+});
+
+test('tagByResource keeps existing tag metadata (e.g. description) for a resource that survives', () => {
+  const doc = {
+    tags: [{ name: 'runs', description: 'Run lifecycle' }],
+    paths: { '/v1/runs': { get: {} } },
+  };
+  const out = tagByResource(doc);
+  assert.deepEqual(out.tags, [{ name: 'runs', description: 'Run lifecycle' }]);
+});
