@@ -60,8 +60,10 @@ export function Footer() {
             </span>
           </FootLink>
           <FootLink href="/docs">Docs</FootLink>
-          <FootLink href="/docs/changelog">Changelog</FootLink>
-          <FootLink href="/docs/langsmith-migration">LangSmith migration</FootLink>
+          <FootLink href={`${githubUrl}/releases`} external>
+            Changelog
+          </FootLink>
+          <FootLink href="/docs/getting-started/migrate-from-langsmith">LangSmith migration</FootLink>
         </div>
       </div>
     </footer>
