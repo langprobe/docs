@@ -1,0 +1,13 @@
+{
+  "title": "Guides",
+  "pages": [
+    "core-concepts",
+    "tracing",
+    "replay",
+    "evals",
+    "prompts",
+    "datasets",
+    "agent-surface",
+    "self-hosting"
+  ]
+}

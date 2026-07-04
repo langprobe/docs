@@ -1,0 +1,75 @@
+---
+title: Core concepts
+description: Runs, spans, span kinds, and how projects, workspaces, and the storage planes fit together.
+---
+
+langprobe models agent execution the way you debug it: a **run** is one
+top-level execution, and **spans** are the nested operations inside it. Together
+they form the trace tree you open in `/runs`.
+
+## Runs and spans
+
+- **Run** — a single top-level execution (an agent invocation, a chain, a
+  request). It has a status (`ok` / `error`), timing, inputs, and outputs.
+- **Span** — one operation inside a run: an LLM call, a tool call, a retrieval,
+  a sub-chain. Spans nest, so the run's tree follows your call structure.
+
+Every span carries timing, status, and — where relevant — token and cost
+attributes, so a run is both a structural tree and a cost/latency breakdown.
+
+## Span kinds
+
+Each span is classified into a **kind**. The first four render as categorical
+badges in the trace view; the rest are tracked and filterable:
+
+<div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', margin: '8px 0 16px' }}>
+  <KindBadge kind="llm" />
+  <KindBadge kind="tool" />
+  <KindBadge kind="retr" />
+  <KindBadge kind="chain" />
+</div>
+
+| Kind | What it is |
+| ---- | ---------- |
+| `llm` | A model call — carries model name, tokens, cost. |
+| `tool` | A tool / function invocation. |
+| `retriever` | A vector or document lookup. |
+| `chain` | A composed step that orchestrates children. |
+| `agent`, `embedding`, `reranker`, `guardrail`, `evaluator`, `workflow`, `task` | Tracked and filterable, not badged. |
+
+langprobe reads the kind from the OpenInference `openinference.span.kind`
+attribute, falling back to OTel `gen_ai.operation.name` and then a span-name
+heuristic. See [Tracing & instrumentation](/docs/guides/tracing) for how these
+get set.
+
+## Traces → runs and spans
+
+langprobe ingests **plain OTLP/HTTP** at `POST /v1/traces`. Incoming OpenTelemetry
+spans (with OpenInference / OTel GenAI semantic conventions) are translated into
+langprobe's native run and span model automatically — there's no proprietary SDK
+in the hot path. A LangSmith-compatible run intake (`POST /v1/runs`) accepts the
+`RunCreate` / `RunUpdate` shapes as well.
+
+## Projects, workspaces, orgs
+
+Runs live inside a hierarchy that scopes access and organization:
+
+- **Org** — the top-level tenant (billing, members, SSO).
+- **Workspace** — a grouping inside an org.
+- **Project** — where runs are collected. A first-run setup creates a default
+  org, workspace, and project so you can send traces immediately.
+
+## Storage planes
+
+langprobe splits state across purpose-built stores:
+
+- **Postgres — control plane.** Orgs, users, projects, API keys, audit log.
+- **ClickHouse — data plane.** Runs, spans, eval scores, replay captures — the
+  high-volume, queryable trace data.
+- **Redis — ingest queue.** Traces are enqueued (`langprobe:ingest:v1`) and a
+  worker drains them into ClickHouse, so intake stays fast under load.
+- **Object storage (S3/MinIO)** — large attachments and inputs.
+
+That separation is why ingest returns `202 Accepted` quickly: the write path is
+a queue append, not a synchronous database write. See
+[Self-hosting](/docs/guides/self-hosting) for the deployment view.
