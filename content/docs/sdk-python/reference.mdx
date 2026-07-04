@@ -1,0 +1,47 @@
+---
+title: API reference
+description: The public symbols exported from the langprobe package.
+---
+
+Everything below is importable from the top-level `langprobe` package.
+
+## Tracing
+
+| Symbol | What it is |
+| ------ | ---------- |
+| `trace` | Decorator — `@trace` or `@trace(kind=..., name=..., tags=[...])`. Turns a function call into a run (or a nested span). |
+| `span` | Context manager — `with span(name, kind=...)`. A span within the active `@trace`; a safe no-op outside one. |
+| `identify` | Context manager — `with identify(end_user_id=..., session_id=..., end_user_metadata=...)`. Declares session / end-user identity for root spans in scope. |
+| `init` | `init(*, api_key=None, endpoint=None, instrumentations=None, service_name=None, processor="batch", ...)` — wire OpenTelemetry + OpenInference and export to `/v1/traces`. Requires the `otel` extra. |
+| `shutdown` | Flush and tear down the provider created by `init()`. |
+
+## Client
+
+| Symbol | What it is |
+| ------ | ---------- |
+| `LangprobeClient` | `LangprobeClient(endpoint, api_key, ...)` — the top-level client. Exposes `.ingest` (write) and `.control` (read), plus `.runs` / `.threads` / `.datasets` / `.prompts` / `.evals` / `.poll`. |
+| `IngestClient` | The write-path client (send runs and spans). Also reachable as `client.ingest`. |
+
+## Models
+
+| Symbol | What it is |
+| ------ | ---------- |
+| `IngestRun` | A run to send on the ingest path. |
+| `IngestSpan` | A span within a run. |
+| `IngestBatch` | A batch of runs + spans for a single POST. |
+
+## Errors
+
+| Symbol | What it is |
+| ------ | ---------- |
+| `LangprobeError` | Base exception for SDK errors. |
+| `LangprobeHTTPError` | Raised on a non-2xx response; carries the HTTP status. |
+
+## Integrations
+
+Imported from submodules (install the matching extra):
+
+- `langprobe.integrations.langchain.LangprobeCallbackHandler`
+- `langprobe.integrations.langsmith.Client`, `langprobe.integrations.langsmith.traceable`
+
+See [LangChain & LangSmith](/docs/sdk-python/integrations).

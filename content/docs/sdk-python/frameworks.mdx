@@ -1,0 +1,76 @@
+---
+title: Frameworks in four lines
+description: langprobe.init() wires OpenTelemetry + the right OpenInference instrumentor for CrewAI, DSPy, Pydantic AI, OpenAI Agents, or LlamaIndex.
+---
+
+With the `otel` extra plus a framework extra, `langprobe.init(...)` wires the
+tracer provider, the OTLP exporter, and the matching OpenInference instrumentor —
+then your framework code runs unchanged.
+
+```sh
+pip install "langprobe[otel,crewai]"
+```
+
+```python
+import langprobe
+
+langprobe.init(
+    api_key="lt_<public_id>.<secret>",
+    endpoint="https://app.langprobe.com",
+    instrumentations=["crewai"],
+)
+# your framework code runs unchanged; traces flow to /v1/traces
+```
+
+You can also configure it from the environment (`LANGPROBE_API_KEY`,
+`LANGPROBE_ENDPOINT`) and pass only `instrumentations`.
+
+## init() options
+
+| Argument | Purpose |
+| -------- | ------- |
+| `api_key`, `endpoint` | Credentials + host (fall back to env). |
+| `instrumentations` | List of framework instrumentors to enable, e.g. `["crewai"]`. |
+| `service_name` | `service.name` resource attribute for the run. |
+| `processor` | `"batch"` (default, production) buffers spans; `"simple"` exports synchronously — use it in short-lived scripts so spans flush before exit. |
+| `headers`, `resource_attributes`, `mask` | Extra OTLP headers, resource attributes, and attribute-value masking. |
+
+## A runnable example — CrewAI
+
+```python
+import langprobe
+
+langprobe.init(
+    instrumentations=["crewai"],
+    service_name="crewai-example",
+    processor="simple",  # scripts: flush synchronously
+)
+
+from crewai import Agent, Crew, Task
+
+researcher = Agent(role="Researcher", goal="Give one crisp fact about the topic",
+                   backstory="A concise research assistant.", verbose=False)
+task = Task(description="State one interesting fact about otters.",
+            expected_output="A single sentence.", agent=researcher)
+crew = Crew(agents=[researcher], tasks=[task], verbose=False)
+print(crew.kickoff())
+
+langprobe.shutdown()   # flush + tear down the provider
+```
+
+Set `LANGPROBE_ENDPOINT` / `LANGPROBE_API_KEY` (and your model provider key) in
+the environment, then run it.
+
+## Supported instrumentations
+
+`crewai`, `dspy`, `pydantic-ai`, `openai-agents`, `llama-index`, `openai`,
+`anthropic`, `litellm` — install the matching extra (`langprobe[otel,dspy]`,
+etc.). The SDK repo ships runnable `examples/` for CrewAI, DSPy, LlamaIndex,
+OpenAI Agents, and Pydantic AI.
+
+<Callout type="warn">
+Long-lived servers should use the default `processor="batch"` and call
+`langprobe.shutdown()` once at shutdown (never per request). Short scripts should
+use `processor="simple"` **or** call `shutdown()` before exit, or the last batch
+of spans is lost.
+</Callout>

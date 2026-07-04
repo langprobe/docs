@@ -1,0 +1,38 @@
+---
+title: Install
+description: One package, langprobe, with everything as optional extras — install only what you need.
+---
+
+The Python SDK is one package, [`langprobe`](https://github.com/langprobe/sdk-python),
+with everything behind optional **extras**. Install only what you use.
+
+```sh
+pip install langprobe
+```
+
+| Install | What you get |
+| ------- | ------------ |
+| `langprobe` | Native SDK — `LangprobeClient` (`.ingest` + `.control`), the `@trace` decorator, the `with span()` context manager, `identify()`. httpx-only, no heavy deps. |
+| `langprobe[otel]` | `langprobe.init(...)` — an OpenTelemetry tracer provider + OTLP/protobuf exporter to `/v1/traces` in four lines. |
+| `langprobe[crewai]` (or `dspy`, `pydantic-ai`, `openai-agents`, `llama-index`, `openai`, `anthropic`, `litellm`) | The matching OpenInference instrumentor, wired by `init(instrumentations=[...])`. |
+| `langprobe[langchain]` | LangChain / LangGraph callback bridge — `LangprobeCallbackHandler`. |
+| `langprobe[langsmith]` | LangSmith-compat shim — `Client`, `traceable`. |
+
+Combine extras as needed — e.g. framework tracing in four lines:
+
+```sh
+pip install "langprobe[otel,crewai]"
+```
+
+## Which one do I want?
+
+- **New code, want traces fast** → `langprobe[otel]` and [`init()`](/docs/sdk-python/frameworks).
+- **New code, want manual control** → `langprobe` and the [native API](/docs/sdk-python/native) (`@trace` / `span`).
+- **A framework** (CrewAI, DSPy, Pydantic AI, OpenAI Agents, LlamaIndex) → `langprobe[otel,<framework>]`.
+- **Existing LangSmith / LangChain code** → the [integrations](/docs/sdk-python/integrations).
+
+<Callout type="info">
+Not on Python? You don't need this SDK — langprobe ingests plain OTLP/HTTP, so
+any language's OpenTelemetry exporter pointed at `/v1/traces` works. See
+[Tracing & instrumentation](/docs/guides/tracing).
+</Callout>

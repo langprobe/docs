@@ -1,0 +1,55 @@
+---
+title: LangChain & LangSmith
+description: A LangChain/LangGraph callback bridge and a one-line LangSmith-compat shim.
+---
+
+Two integrations let existing LangChain and LangSmith code report to langprobe
+with minimal change.
+
+## LangChain / LangGraph
+
+Install the `langchain` extra and drop in a callback handler:
+
+```sh
+pip install "langprobe[langchain]"
+```
+
+```python
+from langprobe.integrations.langchain import LangprobeCallbackHandler
+
+handler = LangprobeCallbackHandler()
+
+# pass it wherever LangChain takes callbacks:
+chain.invoke(inputs, config={"callbacks": [handler]})
+```
+
+The handler bridges LangChain / LangGraph runs onto langprobe's run and span
+model — you keep your chains and graphs as-is.
+
+## LangSmith-compat shim
+
+If you already write LangSmith-shaped code (`traceable`, the `Client`), the
+`langsmith` extra re-exports the same names so migration is a one-line import
+change:
+
+```sh
+pip install "langprobe[langsmith]"
+```
+
+```python
+from langprobe.integrations.langsmith import Client, traceable
+
+@traceable
+def my_agent(prompt: str) -> str:
+    ...
+```
+
+This is the code-side counterpart to the env-var migration in
+[Migrate from LangSmith](/docs/getting-started/migrate-from-langsmith) — either
+re-point your client with `LANGSMITH_ENDPOINT`, or switch the import here.
+
+<Callout type="info">
+The standalone `langprobe-langchain` / `langprobe-langsmith` distributions are
+deprecated — they re-export from `langprobe.integrations.*` for one cycle. Prefer
+the extras above.
+</Callout>

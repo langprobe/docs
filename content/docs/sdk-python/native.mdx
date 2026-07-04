@@ -1,0 +1,81 @@
+---
+title: Native usage
+description: LangprobeClient, the @trace decorator, the span context manager, and identify() — no OpenTelemetry required.
+---
+
+The native SDK is httpx-only: no OpenTelemetry, no heavy deps. Use it when you
+want to instrument code by hand, or to read back runs, datasets, and prompts.
+
+## The client
+
+`LangprobeClient` holds two halves — an **ingest** side (write traces) and a
+**control** side (read/manage runs, threads, datasets, prompts, evals):
+
+```python
+from langprobe import LangprobeClient
+
+client = LangprobeClient(
+    endpoint="https://app.langprobe.com",
+    api_key="lt_<public_id>.<secret>",
+)
+
+client.ingest      # write path — send runs/spans
+client.control     # read path — query the control-plane API
+# convenience handles on the control client:
+client.runs        # client.threads, client.datasets, client.prompts, client.evals, client.poll
+```
+
+## The @trace decorator
+
+Wrap a function and its call becomes a run (or a span, when nested under another
+`@trace`):
+
+```python
+from langprobe import LangprobeClient, trace
+
+client = LangprobeClient(endpoint="https://app.langprobe.com", api_key="lt_...")
+
+@trace
+def my_agent(prompt: str) -> str:
+    return llm_call(prompt)
+
+# customize the span:
+@trace(kind="llm", name="generate", tags=["prod"])
+def generate(prompt: str) -> str:
+    ...
+```
+
+## The span context manager
+
+For a block rather than a whole function, use `with span(...)`. It nests under
+the active `@trace`; used outside one it's a safe no-op (it won't crash your
+code):
+
+```python
+from langprobe import span
+
+@trace
+def pipeline(q: str):
+    with span("retrieve", kind="retriever"):
+        docs = search(q)
+    with span("answer", kind="llm"):
+        return generate(q, docs)
+```
+
+## Identify the end user
+
+`identify()` is a context manager that declares the session / end user for every
+root span in its scope, so you can filter and group runs by who they served.
+Scopes compose (inner overrides outer; metadata merges), and it works with or
+without `init()`:
+
+```python
+from langprobe import identify
+
+with identify(end_user_id="user_123", session_id="sess_abc"):
+    my_agent(prompt)
+```
+
+Prefer a framework? [`init()` + an instrumentor](/docs/sdk-python/frameworks)
+traces your framework automatically, no decorators needed. Full symbol list is in
+the [reference](/docs/sdk-python/reference).
