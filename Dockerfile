@@ -1,13 +1,7 @@
-# Build the static site, serve with nginx (parity with langprobe/website).
-FROM node:20-alpine AS build
-WORKDIR /app
-RUN corepack enable
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
-COPY . .
-RUN pnpm build
-
+# Serve the prebuilt static export with nginx (parity with langprobe/website).
+# Build the static site first on the host / in CI:  pnpm install && pnpm build
+# which emits ./out, then this image just packages it.
 FROM nginx:1.27-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/out /usr/share/nginx/html
+COPY out/ /usr/share/nginx/html/
 EXPOSE 80

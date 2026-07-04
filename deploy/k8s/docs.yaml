@@ -1,0 +1,46 @@
+# langprobe-docs — static docs site (nginx serving the prebuilt Next export).
+# Additive: its own Deployment + Service in the langprobe namespace; does not
+# touch langprobe-web / app.langprobe.com.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: langprobe-docs
+  namespace: langprobe
+  labels: { app: langprobe-docs }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: langprobe-docs }
+  template:
+    metadata:
+      labels: { app: langprobe-docs }
+    spec:
+      containers:
+        - name: nginx
+          image: asia-southeast2-docker.pkg.dev/project-c4ff4ea3-775a-4e0c-9a3/langprobe/docs:5d29516
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet: { path: /, port: 80 }
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /, port: 80 }
+            initialDelaySeconds: 5
+            periodSeconds: 20
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { cpu: 250m, memory: 128Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: langprobe-docs
+  namespace: langprobe
+  labels: { app: langprobe-docs }
+spec:
+  selector: { app: langprobe-docs }
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
