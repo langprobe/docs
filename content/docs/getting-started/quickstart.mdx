@@ -1,0 +1,55 @@
+---
+title: Quickstart
+description: Self-host the whole stack locally, bootstrap the first account, and mint an API key — five minutes, two terminals.
+---
+
+langprobe self-hosts as one `docker compose` file: Postgres for the control
+plane, ClickHouse for runs and spans, Redis for the ingest queue, and the web
+UI. Boot it, bootstrap the first account, and mint a key.
+
+## 1. Boot the stack
+
+```sh
+cp infra/.env.example infra/.env
+# generate the session secret (no default — by design)
+echo "SESSION_SECRET=$(openssl rand -hex 32)" >> infra/.env
+
+docker compose -f infra/docker-compose.yml up --build
+```
+
+Wait for the `web` and `api` containers to settle. Three services come up
+locally:
+
+| Service    | URL                     | Role                              |
+| ---------- | ----------------------- | --------------------------------- |
+| web        | `http://localhost:7090` | Product UI                        |
+| api        | `http://localhost:7081` | Control plane (auth, CRUD, replay)|
+| ingest-api | `http://localhost:7080` | Trace + run intake                |
+
+## 2. First-run setup
+
+Open `http://localhost:7090`. An unbootstrapped instance routes you to the
+setup wizard, which calls `POST /v1/setup` on the **api** service:
+
+<Curl>{`curl -X POST http://localhost:7081/v1/setup \\
+  -H 'content-type: application/json' \\
+  -d '{"email": "you@example.com", "password": "change-me-later", "org_name": "Default"}'`}</Curl>
+
+That single call creates a root user, a default org, a default workspace, and a
+default project, and hands back a session cookie. Once it succeeds the endpoint
+**locks itself** — future `POST`s return `409 Conflict`.
+
+## 3. Mint an API key
+
+In the UI, open **API keys → New key**. Name it `local-dev`, scope it
+`ingest:write`, and copy the `lt_<public_id>.<secret>` value **once** — it's
+hashed on save. Lose it and you mint another.
+
+Keep this key handy: on the [next page](/docs/getting-started/first-trace) you
+paste it into the playground and send your first trace.
+
+## What's next
+
+- [Send your first trace](/docs/getting-started/first-trace) — one `curl`, a `202`, and a run in the UI.
+- [Already on LangSmith?](/docs/getting-started/migrate-from-langsmith) — point your existing client at langprobe; no code change.
+- [Self-hosting](/docs/guides/self-hosting) — architecture, storage stack, and Kubernetes.

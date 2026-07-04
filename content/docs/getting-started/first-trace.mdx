@@ -1,0 +1,54 @@
+---
+title: Send your first trace
+description: One curl, a 202 Accepted, and a run in the UI within seconds.
+---
+
+langprobe ingests over plain OTLP/HTTP and a native JSON run shape — no
+proprietary SDK required. The fastest way to see a run land is a single `curl`.
+
+Set your host and key once, and every `curl` example on this site fills itself
+in:
+
+<PlaygroundSettings />
+
+<Callout type="info">
+Self-hosting locally? Set the host to your **ingest** service —
+`http://localhost:7080` — and paste the `lt_…` key you minted in the
+[Quickstart](/docs/getting-started/quickstart). The hosted default is
+`https://app.langprobe.com`.
+</Callout>
+
+## Send a run
+
+<Curl>{`curl -X POST {{host}}/v1/runs \\
+  -H "Authorization: Bearer {{apiKey}}" \\
+  -H 'content-type: application/json' \\
+  -d '{
+    "sdk": "curl",
+    "runs": [{
+      "run_id": "00000000-0000-0000-0000-000000000001",
+      "name": "hello.world",
+      "kind": "agent",
+      "status": "ok",
+      "start_time": "2026-05-25T00:00:00Z",
+      "end_time": "2026-05-25T00:00:00.842Z",
+      "inputs": "ping",
+      "outputs": "pong"
+    }],
+    "spans": []
+  }'`}</Curl>
+
+You'll get a `202 Accepted`. The ingest service enqueues to Redis; the worker
+drains the queue and writes to ClickHouse. The **Overview** page in the UI shows
+the run within seconds. Open it and you'll see a single `agent`-kind run named
+`hello.world`.
+
+## Real traces, from your framework
+
+That `curl` is the shape a stub sends. For real agents you don't hand-write
+runs — you point an OpenTelemetry exporter (or the langprobe Python SDK) at
+`{{host}}/v1/traces` and your framework's spans flow in automatically.
+
+- [Tracing & instrumentation](/docs/guides/tracing) — OpenInference recipes for CrewAI, DSPy, Pydantic AI, OpenAI Agents, LlamaIndex, and bare providers.
+- [Python SDK](/docs/sdk-python/install) — `langprobe.init(...)` wires it up in four lines.
+- [API Reference: `POST /v1/runs`](/docs/api) — the full run/span schema and an interactive request panel.

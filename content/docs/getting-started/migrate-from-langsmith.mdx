@@ -1,0 +1,42 @@
+---
+title: Migrate from LangSmith
+description: Point your existing LangSmith client at langprobe. One env var, no code change.
+---
+
+langprobe's ingest is LangSmith-compatible: it accepts the native `RunCreate` /
+`RunUpdate` shapes a LangSmith client already sends. Migrating is import-and-go —
+you don't touch your instrumentation code, you re-point it.
+
+## Re-point your client
+
+Set the two environment variables your LangSmith SDK already reads to your
+langprobe host and key:
+
+```sh
+export LANGSMITH_ENDPOINT=http://localhost:7080
+export LANGSMITH_API_KEY="lt_<public_id>.<secret>"
+```
+
+That's the whole change. Your existing traceable functions and callbacks keep
+running; the langprobe shim translates each `RunCreate` / `RunUpdate` into the
+same ingest queue that native runs land in, so they show up alongside everything
+else in `/runs`.
+
+<Callout type="info">
+Swap `http://localhost:7080` for your own ingest host (or the hosted
+`https://app.langprobe.com`). Mint the `lt_…` key in **API keys** — see the
+[Quickstart](/docs/getting-started/quickstart).
+</Callout>
+
+## What carries over
+
+- **Runs and spans** — the run tree, inputs/outputs, latency, and token/cost
+  attributes map onto langprobe's run and span model.
+- **Nothing to re-instrument** — no new decorators, no new SDK. If it worked
+  against LangSmith, it works here.
+
+Once traces are landing, the parts LangSmith doesn't do are what you came for:
+
+- [Replay](/docs/guides/replay) — edit a prompt, model, or tool config, re-run, and diff span by span with a determinism verdict.
+- [Agent surface / MCP](/docs/guides/agent-surface) — token-budgeted, LLM-legible run views so an agent can debug an agent.
+- [Eval-rigor](/docs/guides/evals) — judge your judges before you trust a score.
