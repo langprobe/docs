@@ -1,0 +1,67 @@
+---
+title: Self-hosting
+description: Run langprobe in your VPC — one compose file for local, a Helm chart and operator for Kubernetes.
+---
+
+langprobe is self-hosted by design: it runs in your VPC, on your data, under
+Apache-2.0. The whole stack is one `docker compose` file locally, and a Helm
+chart plus an operator for Kubernetes.
+
+## Architecture
+
+Four stores, each purpose-built (see [Core concepts](/docs/guides/core-concepts)
+for the data model):
+
+- **Postgres** — control plane: orgs, users, projects, API keys, audit log.
+- **ClickHouse** — data plane: runs, spans, eval scores, replay captures.
+- **Redis** — the ingest queue (plus rate-limit buckets and cache).
+- **Object storage (S3/MinIO)** — large attachments and inputs.
+
+Services in front of them: an **ingest-api** (OTLP + LangSmith-shim intake), an
+**ingest-worker** (drains Redis → ClickHouse), the **api** (auth, CRUD, replay),
+and the **web** UI.
+
+## Local: docker compose
+
+```sh
+cp infra/.env.example infra/.env
+echo "SESSION_SECRET=$(openssl rand -hex 32)" >> infra/.env
+docker compose -f infra/docker-compose.yml up --build
+```
+
+Brings up Postgres, ClickHouse, Redis, and the services on ports 7080 (ingest),
+7081 (api), and 7090 (web). See the [Quickstart](/docs/getting-started/quickstart)
+for the first-run walkthrough.
+
+## Kubernetes: Helm & operator
+
+For production, `deploy/` ships a **Helm chart**, raw **k8s** manifests, and an
+**operator** so langprobe drops into your cluster the same way the incumbents'
+charts do — but in your VPC.
+
+## Configuration
+
+Configuration is environment variables, with **no silent defaults for secrets** —
+missing required values fail loudly at startup rather than defaulting:
+
+- `SESSION_SECRET` (≥ 32 chars) — required; generate with `openssl rand -hex 32`.
+- `LANGPROBE_PG_DSN` — Postgres connection string.
+- `LANGPROBE_CLICKHOUSE_URL` — ClickHouse endpoint.
+- `LANGPROBE_REDIS_URL` — Redis URL for the ingest queue.
+
+## Where things live
+
+Useful when something looks stuck:
+
+- **Redis stream** `langprobe:ingest:v1` (consumer group `ingest`); a dead-letter
+  queue `langprobe:ingest:v1:dlq` after repeated redeliveries.
+- **ClickHouse tables** — `run`, `span`, `eval_score`, `eval_aggregate`,
+  `replay_capture`, `replay_run`.
+- **Postgres tables** — `app_user`, `org`, `workspace`, `project`, `api_key`,
+  `audit_log`. Every state-changing call leaves an `audit_log` row.
+
+<Callout type="info">
+Because ingest is a queue append, `POST /v1/traces` and `/v1/runs` return
+`202 Accepted` immediately and the worker writes to ClickHouse asynchronously —
+so a backlog shows up as Redis stream depth, not dropped traces.
+</Callout>

@@ -1,0 +1,49 @@
+---
+title: Evals & eval-rigor
+description: Judge your judges. Schema adherence, test-retest stability, and inter-judge agreement — before you trust a score.
+---
+
+Most platforms give you a single LLM-as-judge and a number. langprobe treats
+evaluation as a measurement problem: a score you can't reproduce isn't a score.
+The point isn't just to grade outputs — it's to tell you whether the **judge**
+is trustworthy.
+
+## The problem with single-judge scores
+
+LLM judges are noisy. Published work documents intra-rater unreliability, recency
+and position bias, verbosity and self-preference bias, and large unexplained
+variance in how a judge applies a rubric. A single judge, run once, hides all of
+it behind one confident number.
+
+## Rigor as a default
+
+langprobe surfaces measurement-theory rigor instead of a bare mean:
+
+- **Panel-of-judges** — score with several judges, not one, and report agreement.
+- **Test–retest stability** — run the same judge on the same output more than
+  once and report how consistent it is (intra-rater reliability).
+- **Inter-judge agreement** — how much the judges agree with each other (e.g. a
+  κ statistic), so you know whether the rubric is well-defined.
+- **Schema adherence** — did the judge actually return the structured verdict it
+  was asked for, every time?
+- **Reference answers & score anchors** — reference outputs and per-score
+  descriptions as first-class inputs, so judgments are anchored, not vibes.
+
+Together these tell you a score's confidence, not just its value — the difference
+between "8.2" and "8.2, but the judges only agree κ=.41, so don't trust it."
+
+## Judges
+
+Evals run as **eval-runs** — a judge (or a panel) fans out over a set of runs and
+produces scored verdicts with the reliability metrics above. langprobe also
+supports small, purpose-built open-weight judge models for cheap, repeatable
+scoring alongside frontier-model judges.
+
+## Closing the loop
+
+Because a [replay](/docs/guides/replay) can be scored by the same judges as
+production, "the fix looks better" becomes "the fix scores at least as well, and
+the judges agree it does." Replay → diff → eval is one loop.
+
+See the [API Reference](/docs/api) for the `eval-runs`, `luna-judges`, and
+`eval-reliability` endpoints.

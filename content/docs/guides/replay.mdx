@@ -1,0 +1,43 @@
+---
+title: Replay
+description: Open a broken run, edit a prompt, model, or tool config, re-run it, and diff span by span — with a determinism verdict.
+---
+
+Replay is the part the dashboards don't do. It's the debugger you reach for at
+2am: take a captured run, change something, run it again against a real model,
+and see exactly what changed.
+
+## Edit → re-run → diff
+
+1. **Open** a captured run in `/runs`.
+2. **Edit** a prompt, a model, or a tool config on any span.
+3. **Re-run** — langprobe replays the run with your edit applied.
+4. **Diff** — compare the replay to the original, span by span: outputs,
+   status, latency, tokens, and cost, side by side.
+
+A one-line tool-config change (say `timeout_s: 5 → 30`) becomes a concrete,
+reviewable diff: which spans changed, and whether a failing span now succeeds.
+
+## The determinism verdict
+
+A single passing replay can be luck. langprobe samples the replay and reports a
+**determinism verdict** — how stable the new outcome is across runs — so you know
+whether a fix is real or a lucky sample before you ship it.
+
+## Replay → diff → eval
+
+Replay chains into the rest of the loop:
+
+- **Diff** the replay against the original to see the delta.
+- **Eval** the replay with the same judges as production, so "it looks fixed"
+  becomes "it scores at least as well."
+
+This is also the loop the [agent surface](/docs/guides/agent-surface) exposes
+over REST and MCP — find the failed run, read its salient slice, replay an edit,
+read the diff — so an agent can debug an agent.
+
+<Callout type="info">
+Span-level replay and diffing are live today. A fully client-side replay harness
+(true control-flow re-execution of arbitrary agent code) is on the roadmap —
+see the project README for current status.
+</Callout>
