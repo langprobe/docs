@@ -12,6 +12,16 @@ test('mergeOpenAPI unions paths and component schemas', () => {
   assert.deepEqual(m.tags.map(t=>t.name).sort(), ['ingest','runs']);
 });
 
+test('mergeOpenAPI unions methods on overlapping paths instead of clobbering', () => {
+  const a = { openapi:'3.1.0', info:{title:'a',version:'1'}, paths:{ '/v1/runs':{ post:{ summary:'send a trace' } } }, components:{} };
+  const b = { openapi:'3.1.0', info:{title:'b',version:'1'}, paths:{ '/v1/runs':{ get:{ summary:'query runs' } } }, components:{} };
+  const m = mergeOpenAPI(a, b);
+  assert.ok(m.paths['/v1/runs'].get, 'GET should survive the merge');
+  assert.ok(m.paths['/v1/runs'].post, 'POST should survive the merge');
+  assert.equal(m.paths['/v1/runs'].post.summary, 'send a trace');
+  assert.equal(m.paths['/v1/runs'].get.summary, 'query runs');
+});
+
 test('tagByResource tags operations by the segment after /v1/', () => {
   const doc = { paths:{ '/v1/runs/{id}/spans':{ get:{}, post:{} }, '/v1/traces':{ post:{} } } };
   const out = tagByResource(doc);
