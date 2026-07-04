@@ -1,0 +1,35 @@
+---
+title: Datasets & comparisons
+description: Curate runs into datasets and compare versions side by side.
+---
+
+Datasets turn ad-hoc runs into a fixed set you can evaluate and regress against;
+comparisons put two versions next to each other.
+
+## Datasets
+
+A dataset is a named collection of items (inputs, and optionally reference
+outputs):
+
+- `POST /v1/datasets` creates one; `GET /v1/datasets` lists them.
+- `GET|POST /v1/datasets/{dataset_id}/items` reads and adds items.
+- `POST /v1/runs/_actions/add-to-dataset` promotes real runs straight from
+  `/runs` into a dataset — the fastest way to build a regression set from
+  production traffic you've already seen.
+
+Point an [eval-run](/docs/guides/evals) at a dataset to score a whole set with a
+judge panel and reliability metrics.
+
+## Comparisons
+
+A comparison holds the results of running two configurations over the same
+inputs, so you can read the delta rather than eyeball two tabs:
+
+- `POST /v1/comparisons` creates a comparison; `GET /v1/comparisons/{id}` and
+  `.../items` read it back.
+
+Paired with [replay](/docs/guides/replay), a comparison answers "did this change
+actually help, across the set?" — not just "did it help on this one run?"
+
+See the [API Reference](/docs/api) for the full `datasets` and `comparisons`
+endpoints.

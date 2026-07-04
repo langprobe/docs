@@ -1,0 +1,38 @@
+---
+title: Prompts
+description: Version prompts, pin aliases, and iterate in the playground.
+---
+
+Prompts are versioned artifacts in langprobe, not strings buried in code. You
+edit them, keep a history, and point stable **aliases** at whichever version is
+live.
+
+## Versioning
+
+Every prompt has an immutable version history:
+
+- `POST /v1/prompts` creates a prompt; `GET /v1/prompts` lists them.
+- `POST /v1/prompts/{prompt_id}/versions` saves a new version; `GET .../versions`
+  lists the history and `GET .../versions/{version}` fetches one.
+
+Because versions are immutable, a run always records exactly which prompt version
+produced it — so a regression is traceable to the version that introduced it.
+
+## Aliases
+
+An **alias** (e.g. `production`, `staging`) is a named pointer to a version:
+
+- `POST /v1/prompts/{prompt_id}/aliases` points an alias at a version.
+
+Your application references the alias, not a version number, so promoting a new
+prompt is one call — no redeploy — and rolling back is repointing the alias.
+
+## Playground
+
+The prompt playground lets you edit a prompt and run it against a real model
+before you save a version — the same messages, tools, and model config you'd use
+in production. It shares the `playground` API surface, so what you try
+interactively is the same thing you version and ship.
+
+See the [API Reference](/docs/api) for the full `prompts` and `playground`
+endpoints, each with an interactive request panel.

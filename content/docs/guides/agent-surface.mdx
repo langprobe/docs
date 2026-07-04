@@ -1,0 +1,45 @@
+---
+title: Agent surface & MCP
+description: The same debugger, built for agents. Token-budgeted, LLM-legible run views over REST and MCP — so an agent can debug an agent.
+---
+
+langprobe's surface is built for agents, not just people. A 48k-token trace is
+useless to an LLM with a budget; langprobe projects it into a **token-budgeted,
+LLM-legible slice** so a coding agent can find a failed run, read the salient
+part, replay an edit, and read the diff — hands-free.
+
+## Token-budgeted run views
+
+Every agent read is a projection over the same data the UI shows, sized to a
+token budget instead of dumped raw:
+
+- `GET /v1/runs/{run_id}/agent-view` — a salient slice of a run: the spans that
+  matter (errors, the critical path), trimmed to fit a budget. A 48k-token trace
+  becomes a ~2k-token summary an agent can actually reason over.
+- `GET /v1/agent/failed-runs` — the failed runs worth looking at, ranked, so an
+  agent can pick what to debug.
+- `GET /v1/agent/instrument-guide` — a machine-readable guide for wiring up
+  tracing, so an agent can instrument a repo without a human in the loop.
+
+These are the same REST endpoints humans and CI use — one surface, three
+audiences.
+
+## MCP: an agent can debug an agent
+
+Over MCP, langprobe exposes the debug loop as tools a coding agent (Claude, etc.)
+can call directly:
+
+- `runs.search` — find the run (e.g. status `error`, last hour).
+- `runs.read` — read its token-budgeted salient slice.
+- `replay.edit` — apply an edit (change a timeout, a prompt, a model) and queue a
+  replay.
+- `replay.diff` — read what changed, with the determinism verdict.
+
+That's the whole loop — find → read → replay → diff — as API calls, so the agent
+that's debugging never has to leave its context to open a dashboard.
+
+<Callout type="info">
+Because the agent surface and the human UI are the same API, anything an agent
+can do here, you can do in `/runs` — and vice versa. See the
+[API Reference](/docs/api) for the `agent`, `runs`, and `replays` endpoints.
+</Callout>
