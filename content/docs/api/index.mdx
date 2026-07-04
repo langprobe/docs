@@ -1,26 +1,55 @@
 ---
 title: API Reference
-description: Auto-generated from the langprobe OpenAPI schema.
+description: The langprobe REST API — authentication, the interactive playground, and 101 endpoints generated from the OpenAPI schema.
 ---
 
-The langprobe API reference below is generated directly from the committed
-OpenAPI schema at `openapi/openapi.json` (101 operations across 30 resource
-tags). Every operation page includes the request/response shape and an
-interactive request panel.
+The langprobe API reference is generated directly from the committed OpenAPI
+schema (`openapi/openapi.json`) — 101 operations across 30 resource groups. Every
+operation page shows the request/response shape, an interactive request panel,
+and a copy-ready `curl`.
 
-Requests from the panel are made directly from your browser to
-`https://app.langprobe.com` (or whichever host you set in the
-[playground settings](/docs)) — there is no server-side proxy, so this site
-can be fully static. If your host doesn't allow cross-origin requests from
-this docs site, use the equivalent `curl` command shown on each page instead.
+## Set your host and key
 
-Set your API key once via the playground settings bar and it will be reused
-for every request on this site, either as a `Authorization: Bearer` header or
-an `X-Api-Key` header, matching the schema's two security schemes.
+Set these once and every `curl` and request panel on this site fills itself in:
+
+<PlaygroundSettings />
+
+They're stored only in your browser (`localStorage`). The default host is
+`https://app.langprobe.com`; self-hosters set it to their own ingest/api host
+(e.g. `http://localhost:7080`).
+
+## Authentication
+
+Every request authenticates with an API key — the `lt_<public_id>.<secret>` value
+you mint under **API keys → New key** (see the
+[Quickstart](/docs/getting-started/quickstart)). The schema declares two
+equivalent security schemes:
+
+- `Authorization: Bearer lt_<public_id>.<secret>`
+- `X-Api-Key: lt_<public_id>.<secret>`
+
+Send whichever your client prefers. A quick smoke test:
+
+<Curl>{`curl {{host}}/v1/runs \\
+  -H "Authorization: Bearer {{apiKey}}"`}</Curl>
+
+## Trying requests in-browser
+
+Requests from the interactive panel are made **directly from your browser** to
+the configured host — there is no server-side proxy, which is what keeps this
+site fully static. If your host doesn't allow cross-origin requests from the docs
+origin, use the `curl` command shown on each page instead.
+
+## Resources
 
 <Cards>
   <Card title="Runs" href="/docs/api/runs" description="Query and manage agent/LLM runs" />
-  <Card title="Traces" href="/docs/api/traces" description="Send and inspect OpenTelemetry traces" />
-  <Card title="Replays" href="/docs/api/replays" description="Replay recorded agent runs" />
+  <Card title="Traces" href="/docs/api/traces" description="Send OpenTelemetry traces (/v1/traces)" />
+  <Card title="Replays" href="/docs/api/replays" description="Replay recorded runs and diff them" />
   <Card title="Eval Runs" href="/docs/api/eval-runs" description="Trigger and inspect eval runs" />
+  <Card title="Prompts" href="/docs/api/prompts" description="Version prompts and pin aliases" />
+  <Card title="Datasets" href="/docs/api/datasets" description="Curate runs into datasets" />
 </Cards>
+
+See [Errors, pagination & rate limits](/docs/api/errors) for status codes and
+conventions.

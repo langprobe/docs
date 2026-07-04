@@ -2,6 +2,7 @@
   "title": "API Reference",
   "pages": [
     "index",
+    "errors",
     "runs",
     "traces",
     "replays",

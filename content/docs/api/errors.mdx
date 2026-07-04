@@ -1,0 +1,43 @@
+---
+title: Errors, pagination & rate limits
+description: Status codes, list pagination, and rate limiting across the langprobe API.
+---
+
+Conventions that apply across the API.
+
+## Status codes
+
+| Status | Meaning |
+| ------ | ------- |
+| `200 OK` | Successful read or update. |
+| `202 Accepted` | **Ingest accepted.** `POST /v1/traces` and `POST /v1/runs` enqueue to Redis and return immediately; the worker writes to ClickHouse asynchronously. A `202` means "queued," not "queryable yet." |
+| `400 / 422` | Malformed request or failed validation. |
+| `401 / 403` | Missing, invalid, or unauthorized API key. |
+| `404 Not Found` | No such resource in your scope. |
+| `409 Conflict` | State conflict — e.g. `POST /v1/setup` after the instance is already bootstrapped (it locks itself). |
+| `429 Too Many Requests` | Rate limited — back off and retry. |
+
+## Authentication
+
+Send your `lt_<public_id>.<secret>` key as either `Authorization: Bearer <key>`
+or `X-Api-Key: <key>` — see [Authentication](/docs/api). A missing or wrong key
+returns `401` / `403`.
+
+## Pagination
+
+List endpoints page with **`limit`** and **`offset`** query parameters. For
+example, `GET /v1/runs` takes a required `project_id` plus optional filters
+(`status`, `kind`, `search`, `window_seconds`) and `limit` / `offset`:
+
+<Curl>{`curl "{{host}}/v1/runs?project_id=PROJECT_ID&status=error&limit=50&offset=0" \\
+  -H "Authorization: Bearer {{apiKey}}"`}</Curl>
+
+Increment `offset` by `limit` to page through results. Each operation page in
+this reference lists that endpoint's exact parameters.
+
+## Rate limits
+
+Ingest and API requests are rate limited with Redis token buckets. When you
+exceed a bucket you get `429 Too Many Requests`; retry with backoff. High-volume
+trace ingestion is designed for the `202`-and-queue path, so throughput is bound
+by queue drain, not by synchronous writes.
